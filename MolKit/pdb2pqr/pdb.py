@@ -25,8 +25,10 @@
     Washington University in St. Louis
 """
 
-import string
 import sys
+import os
+import random
+import subprocess
 
 
 class END:
@@ -417,7 +419,7 @@ class HETATM:
                 self.segID = line[72:76].strip()
                 self.element = line[76:78].strip()
                 self.charge = line[78:80].strip()
-            except ValueError as IndexError:
+            except (ValueError, IndexError):
                 self.occupancy = 0.00
                 self.tempFactor = 0.00
                 self.segID = ""
@@ -546,7 +548,7 @@ class ATOM:
                 self.segID = line[72:76].strip()
                 self.element = line[76:78].strip()
                 self.charge = line[78:80].strip()
-            except ValueError as IndexError:
+            except (ValueError, IndexError):
                 self.occupancy = 0.00
                 self.tempFactor = 0.00
                 self.segID = ""
@@ -1673,13 +1675,13 @@ class MODRES:
         """
         record = line[0:6].strip()
         if record == "MODRES":
-            string.idCode = line[7:11].strip()
-            string.resName = line[12:15].strip()
-            string.chainID = line[16].strip()
-            string.seqNum = int(line[18:22].strip())
-            string.iCode = line[22].strip()
-            string.stdRes = line[24:27].strip()
-            string.comment = line[29:70].strip()
+            self.idCode = line[7:11].strip()
+            self.resName = line[12:15].strip()
+            self.chainID = line[16].strip()
+            self.seqNum = int(line[18:22].strip())
+            self.iCode = line[22].strip()
+            self.stdRes = line[24:27].strip()
+            self.comment = line[29:70].strip()
         else:
             raise ValueError(record)
 
@@ -2309,18 +2311,11 @@ def readAtom(line):
             self.x = float(line[30:38].strip())
             self.y = float(line[38:46].strip())
             self.z = float(line[46:54].strip())
-            try:
-                self.occupancy = float(line[54:60].strip())
-                self.tempFactor = float(line[60:66].strip())
-                self.segID = line[72:76].strip()
-                self.element = line[76:78].strip()
-                self.charge = line[78:80].strip()
-            except ValueError, IndexError:
-                self.occupancy = 0.00
-                self.tempFactor = 0.00
-                self.segID = 0
-                self.element = 0
-                self.charge = 0
+            self.occupancy = float(line[54:60].strip())
+            self.tempFactor = float(line[60:66].strip())
+            self.segID = line[72:76].strip()
+            self.element = line[76:78].strip()
+            self.charge = line[78:80].strip()
         else: raise ValueError, record
     """
 
@@ -2394,24 +2389,21 @@ def readPDB(file):
             return pdblist, errlist
 
         def getRandom():
-            """ Download a random PDB and return the path name.
-                Returns
-                  path name of downloaded file
-            """
-
-            import os, random
+             """ Download a random PDB and return the path name.
+                 Returns
+                   path name of downloaded file
+             """
 
             URL = "ftp://ftp.rcsb.org/pub/pdb/data/structures/all/pdb/"
-            pdblines = os.popen("ncftpls %s" % URL).readlines()
-            pdbline = ''.join(pdblines)
-            pdbline.replace(pdbline, "\n", "")
-            pdbline.replace(pdbline, "@", "")
-            pdbline = pdbline.strip()
-            pdblist = pdbline.split()
-            pdbZ = random.choice(pdblist)
-            os.popen("ncftpget %s/%s" % (URL, pdbZ))
-            os.popen("uncompress %s" % pdbZ)
-            return pdbZ[:-2]
+            try:
+                out = subprocess.check_output(["ncftpls", URL], stderr=subprocess.DEVNULL)
+                pdblines = out.decode().split()
+                pdbZ = random.choice(pdblines)
+                subprocess.check_call(["ncftpget", f"{URL}/{pdbZ}"])
+                subprocess.check_call(["uncompress", pdbZ])
+                return pdbZ[:-2]
+            except (subprocess.CalledProcessError, IndexError):
+                raise RuntimeError("Failed to fetch random PDB")
 
         def main():
             """ Main driver for testing.  Parses set number of random PDBs """

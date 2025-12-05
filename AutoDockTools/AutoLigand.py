@@ -29,7 +29,7 @@ import getopt
 from numpy import zeros
 from math import sqrt
 import copy
-import string
+# import string   # removed - using builtins float/int/str.split instead
 
 def main():
 
@@ -195,18 +195,18 @@ def main():
 		if Oflag == 1: lineO = Omap.readline()
 		if Sflag == 1: lineS = Smap.readline()
 		if i == 3:
-			word = string.split(linee)
-			spacing = string.atof(word[1])
+			word = linee.split()
+			spacing = float(word[1])
 		if i == 4:
-			word = string.split(linee)
-			nelementsx = string.atoi(word[1])
-			nelementsy = string.atoi(word[2])
-			nelementsz = string.atoi(word[3])
+			word = linee.split()
+			nelementsx = int(word[1])
+			nelementsy = int(word[2])
+			nelementsz = int(word[3])
 		if i == 5:
-			word = string.split(linee)
-			centerx = string.atof(word[1])
-			centery = string.atof(word[2])
-			centerz = string.atof(word[3])
+			word = linee.split()
+			centerx = float(word[1])
+			centery = float(word[2])
+			centerz = float(word[3])
 	Alist = []
 	Clist = []
 	Hlist = []
@@ -241,15 +241,15 @@ def main():
 
 	while i < total_points:
 		linee = emap.readline()
-		worde = string.split(linee)
-		eMapVal = string.atof(worde[0])
+		worde = linee.split()
+		eMapVal = float(worde[0])
 		lined = dmap.readline()
-		wordd = string.split(lined)
-		dMapVal = string.atof(wordd[0])
+		wordd = lined.split()
+		dMapVal = float(wordd[0])
 		if Aflag == 1:
 			lineA = Amap.readline()
-			word = string.split(lineA)
-			rawdatum = string.atof(word[0])
+			word = lineA.split()
+			rawdatum = float(word[0])
 			# datum = string.atof(word[0])
 			# datum = rawdatum + (qA * eMapVal) + (abs(qA) * dMapVal)
 			datum = rawdatum + (abs(qA) * dMapVal)
@@ -257,8 +257,8 @@ def main():
 		else: Alist.append(1000000.)
 		if Cflag == 1:
 			lineC = Cmap.readline()
-			word = string.split(lineC)
-			rawdatum = string.atof(word[0])
+			word = lineC.split()
+			rawdatum = float(word[0])
 			# datum = string.atof(word[0])
 			# datum = rawdatum + (qC * eMapVal) + (abs(qC) * dMapVal)
 			datum = rawdatum + (abs(qC) * dMapVal)
@@ -267,8 +267,8 @@ def main():
 		# the Clist is set lower than the others as a default
 		if Hflag == 1:
 			lineH = Hmap.readline()
-			word = string.split(lineH)
-			rawdatum = string.atof(word[0])
+			word = lineH.split()
+			rawdatum = float(word[0])
 			# datum = string.atof(word[0])
 			# datum = rawdatum + (qH * eMapVal) + (abs(qH) * dMapVal)
 			datum = rawdatum + (abs(qH) * dMapVal)
@@ -276,8 +276,8 @@ def main():
 		else: Hlist.append(1000000.)
 		if Nflag == 1:
 			lineN = Nmap.readline()
-			word = string.split(lineN)
-			rawdatum = string.atof(word[0])
+			word = lineN.split()
+			rawdatum = float(word[0])
 			# datum = string.atof(word[0])
 			# datum = rawdatum + (qN * eMapVal) + (abs(qN) * dMapVal)
 			datum = rawdatum + (abs(qN) * dMapVal)
@@ -285,8 +285,8 @@ def main():
 		else: Nlist.append(1000000.)
 		if NAflag == 1:
 			lineNA = NAmap.readline()
-			word = string.split(lineNA)
-			rawdatum = string.atof(word[0])
+			word = lineNA.split()
+			rawdatum = float(word[0])
 			# datum = string.atof(word[0])
 			# datum = rawdatum + (qNA * eMapVal) + (abs(qNA) * dMapVal)
 			datum = rawdatum + (abs(qNA) * dMapVal)
@@ -294,8 +294,8 @@ def main():
 		else: NAlist.append(1000000.)
 		if Oflag == 1:
 			lineO = Omap.readline()
-			word = string.split(lineO)
-			rawdatum = string.atof(word[0])
+			word = lineO.split()
+			rawdatum = float(word[0])
 			# datum = string.atof(word[0])
 			# datum = rawdatum + (qO * eMapVal) + (abs(qO) * dMapVal)
 			datum = rawdatum + (abs(qO) * dMapVal)
@@ -303,8 +303,8 @@ def main():
 		else: Olist.append(1000000.)
 		if Sflag == 1:
 			lineS = Smap.readline()
-			word = string.split(lineS)
-			rawdatum = string.atof(word[0])
+			word = lineS.split()
+			rawdatum = float(word[0])
 			# datum = string.atof(word[0])
 			# datum = rawdatum + (qS * eMapVal) + (abs(qS) * dMapVal)
 			datum = rawdatum + (abs(qS) * dMapVal)
@@ -1410,6 +1410,7 @@ def main():
 			continue
 		else:
 			lastOP = thisOP
+
 			newOUTlist.append(thisOP)
 	resultName = FileBaseName + '_' + str(volume) + 'Results.txt'
 	results_out = open(resultName,'w')

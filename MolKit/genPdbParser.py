@@ -20,7 +20,9 @@
 # Copyright: M. Sanner TSRI 2000
 #
 #############################################################################
-import string
+# removed use of the legacy string module; use explicit constants below
+_DIGITS = '0123456789'
+_ASCII_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 from MolKit.molecule import Atom
 from MolKit.pdbParser import PdbParser
@@ -66,17 +68,18 @@ class GenPdbParser(PdbParser):
         ok = 1
         if type == 'int':
             for c in val:
-                if c not in (string.digits + ' -'):
+                if c not in (_DIGITS + ' -'):
                     ok = 0
         elif type == 'character':
-            if len(val) != 1 or val not in (string.ascii_letters + ' '): ok = 0
+            if len(val) != 1 or val not in (_ASCII_LETTERS + ' '):
+                ok = 0
         elif type == 'float':
             for c in val:
-                if c not in (string.digits + '. -'):
+                if c not in (_DIGITS + '. -'):
                     ok = 0
         elif type == 'alphabetic':
             for c in val:
-                if c not in (string.ascii_letters + ' '):
+                if c not in (_ASCII_LETTERS + ' '):
                     ok = 0
         elif type == 'string':
             pass

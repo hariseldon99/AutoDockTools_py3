@@ -62,7 +62,9 @@
 
 import copy  ### PC
 import sys
-import string
+import subprocess
+import random
+import os
 
 class END:
     """ END class
@@ -463,7 +465,7 @@ class HETATM:
                 self.segID = line[72:76].strip()
                 self.element = line[76:78].strip()
                 self.charge = line[78:80].strip()
-            except ValueError as IndexError:
+            except (ValueError, IndexError):
                 self.occupancy = 0.00
                 self.tempFactor = 0.00
                 self.segID = ""
@@ -738,7 +740,7 @@ class ATOM:
                 self.segID = line[72:76].strip()
                 self.element = line[76:78].strip()
                 self.charge = line[78:80].strip()
-            except ValueError as IndexError:
+            except (ValueError, IndexError):
                 self.occupancy = 0.00
                 self.tempFactor = 0.00
                 self.segID = ""
@@ -1767,6 +1769,7 @@ class HETSYN:
         record = line[0:6].strip()
         if record == "HETSYN":
             self.hetID = line[11:14].strip()
+           
             self.hetSynonyms = line[15:70].strip()
         else:
             raise ValueError(record)
@@ -1865,13 +1868,13 @@ class MODRES:
         """
         record = line[0:6].strip()
         if record == "MODRES":
-            string.idCode = line[7:11].strip()
-            string.resName = line[12:15].strip()
-            string.chainID = line[16].strip()
-            string.seqNum = int(line[18:22].strip())
-            string.iCode = line[22].strip()
-            string.stdRes = line[24:27].strip()
-            string.comment = line[29:70].strip()
+            self.idCode = line[7:11].strip()
+            self.resName = line[12:15].strip()
+            self.chainID = line[16].strip()
+            self.seqNum = int(line[18:22].strip())
+            self.iCode = line[22].strip()
+            self.stdRes = line[24:27].strip()
+            self.comment = line[29:70].strip()
         else:
             raise ValueError(record)
 
@@ -2448,7 +2451,7 @@ class OBSLTE:
             self.rIdCodes.append(line[51:55].strip())
             self.rIdCodes.append(line[56:60].strip())
             self.rIdCodes.append(line[61:65].strip())
-            self.rIdCodes.append(line[67:70].strip())
+            self.rIdCodes.append(line[66:70].strip())
         else:
             raise ValueError(record)
 
@@ -2501,18 +2504,11 @@ def readAtom(line):
             self.x = float(line[30:38].strip())
             self.y = float(line[38:46].strip())
             self.z = float(line[46:54].strip())
-            try:
-                self.occupancy = float(line[54:60].strip())
-                self.tempFactor = float(line[60:66].strip())
-                self.segID = line[72:76].strip()
-                self.element = line[76:78].strip()
-                self.charge = line[78:80].strip()
-            except ValueError, IndexError:
-                self.occupancy = 0.00
-                self.tempFactor = 0.00
-                self.segID = 0
-                self.element = 0
-                self.charge = 0
+            self.occupancy = float(line[54:60].strip())
+            self.tempFactor = float(line[60:66].strip())
+            self.segID = line[72:76].strip()
+            self.element = line[76:78].strip()
+            self.charge = line[78:80].strip()
         else: raise ValueError, record
     """
 
@@ -2591,20 +2587,17 @@ def getRandom():
           path name of downloaded file
     """
 
-    import os, random
-
     URL = "ftp://ftp.rcsb.org/pub/pdb/data/structures/all/pdb/"
-    pdblines = os.popen("ncftpls %s" % URL).readlines()
-    pdbline = ''.join(pdblines)
-    pdbline.replace(pdbline, "\n", "")
-    pdbline.replace(pdbline, "@", "")
-    pdbline = pdbline.strip()
-    pdblist = pdbline.split()
-
-    pdbZ = random.choice(pdblist)
-    os.popen("ncftpget %s/%s" % (URL, pdbZ))
-    os.popen("uncompress %s" % pdbZ)
-    return pdbZ[:-2]
+    try:
+        out = subprocess.check_output(["ncftpls", URL], stderr=subprocess.DEVNULL)
+        # split output into tokens and choose one file
+        pdblist = out.decode().split()
+        pdbZ = random.choice(pdblist)
+        subprocess.check_call(["ncftpget", f"{URL}/{pdbZ}"])
+        subprocess.check_call(["uncompress", pdbZ])
+        return pdbZ[:-2]
+    except (subprocess.CalledProcessError, FileNotFoundError, IndexError) as e:
+        raise RuntimeError("Failed to fetch random PDB") from e
 
 
 def main():
