@@ -5,10 +5,10 @@ Python3 translation of AutoDockTools
 
 *Linux*
 
-`python -m pip install git+https://github.com/Valdes-Tresanco-MS/AutoDockTools_py3`
+`python -m pip install git+https://github.com/hariseldon99/AutoDockTools_py3`
 
 *Windows*
 
-`python.exe -m pip install git+https://github.com/Valdes-Tresanco-MS/AutoDockTools_py3`
+`python.exe -m pip install git+https://github.com/hariseldon99/AutoDockTools_py3`
 
 # This version is under test.
